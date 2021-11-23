@@ -62,7 +62,9 @@ The following diagram illustrates the solution architecture:
 
 2. Increase EBS volume to 30GB by running:
 
-`aws ec2 modify-volume --volume-id [VOLUME_ID] --size 50`
+    `aws ec2 modify-volume --volume-id [VOLUME_ID] --size 30`
+
+    Also, reboot your instance from EC2 console for the change to take effect. 
 
 3. Type in the terminal: `sam init`
 

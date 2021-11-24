@@ -52,7 +52,7 @@ The following diagram illustrates the solution architecture:
 
     and click next. 
 
-7) Review Environment name and settings and click on create environment. Cloud9 will boot up an development environment in a few minutes. 
+7) Review Environment name and settings and click on create environment. Cloud9 will boot up a development environment in a few minutes. 
 
 **Stage 2** Use SAM CLI to build the application. Follow these steps. 
 
@@ -94,7 +94,7 @@ The following diagram illustrates the solution architecture:
 
 3. Use AWS Region as `us-east-1`
 
-4. For Parameter SrcBucket, create a uniue bucket name. We will use the last 4 digits of your phone number to ensure this. 
+4. For Parameter SrcBucket, create a unique bucket name. We will use the last 4 digits of your phone number to ensure this. 
 `reinventdemobucket-<PHONE_NUMBER_DIGITS>`
 
 5. Select Yes for the next set of prompts:
@@ -122,7 +122,7 @@ SAM should start the deployment process by uploading your container image to Ama
 
     - [French](https://github.com/JaidedAI/EasyOCR/releases/download/v1.3/latin_g2.zip)
 
-2. Unzip the models so they are extracted as .pth files and upload them to the newly created S3 bucket. 
+2. Unzip the models, so they are extracted as .pth files and upload them to the newly created S3 bucket. 
 
 3. Validate the models have been downloaded to EFS, by checking the EFS size to be ~110 MB.
 
@@ -140,12 +140,12 @@ SAM should start the deployment process by uploading your container image to Ama
 }'
 ```
 
-You sould get an inference response with the predicted label. 
+You should get an inference response with the predicted label. 
 
 # Summary
 In this workshop, you deployed a multi-model inferencing endpoint using AWS Lambda and Amazon EFS. 
 
-When you upload your models to S3, an AWS Lambda function gets triggered and loads the models into an Amazon Elastic File System that is mounted on a second AWS Lambda function that is connected to an API gateway endpoint to perform optical character recognition on images in different laungues. When an inference request is sent, based on the language specified, the Lambda function fetches the appropriate language model from mounted EFS and uses that to produce an `predicted_label`. 
+When you upload your models to S3, an AWS Lambda function gets triggered and loads the models into an Amazon Elastic File System that is mounted on a second AWS Lambda function that is connected to an API gateway endpoint to perform optical character recognition on images in multiple languages. When an inference request is sent, based on the language specified, the Lambda function fetches the appropriate language model from mounted EFS and uses that to produce a `predicted_label`. 
 
 This pattern simplifies your model management using Amazon EFS while providing benefits of Serverless ML in terms of pay-for-use, simple programming model, and reduced operational overhead.
 

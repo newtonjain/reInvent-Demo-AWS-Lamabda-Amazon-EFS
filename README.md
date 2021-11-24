@@ -56,15 +56,25 @@ The following diagram illustrates the solution architecture:
 
 **Stage 2** Use SAM CLI to build the application. Follow these steps. 
 
-1. Fetch the EBS Volume ID by running: 
+1. Fetch the EBS Volume ID and increase EBS volume to 30GB by running: 
 
-[VISHU TO PROVIDE THIS COMMAND]
+    ```
+    INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 
-2. Increase EBS volume to 30GB by running:
+    VOLUME_ID=$(aws ec2 describe-volumes \
+    --query "Volumes[?Attachments[?InstanceId=='$INSTANCE_ID']].{ID:VolumeId}" \
+    --output text)
 
-    `aws ec2 modify-volume --volume-id [VOLUME_ID] --size 30`
+    aws ec2 modify-volume --volume-id $VOLUME_ID --size 30
+    ```
 
-    Also, reboot your instance from EC2 console for the change to take effect. 
+2. Let’s ensure our Linux environment makes use of the newly allocated space. 
+
+    ```
+    sudo growpart /dev/nvme0n1 1
+
+    sudo xfs_growfs -d /
+    ```
 
 3. Type in the terminal: `sam init`
 
@@ -72,7 +82,9 @@ The following diagram illustrates the solution architecture:
 
 5. The template uses Python 3.8. Install that in your environment using: `sudo amazon-linux-extras install python3.8`
 
-6. Build the application wuth SAM using `sam build` 
+6. Build the application wuth SAM using `sam build`. 
+
+    Once finished, you will see Build Succeeded in the terminal. If the build fails, get some assistance from the presenters. 
 
 **Stage 3** Deploy the CloudFormation stack with SAM following these steps.
 

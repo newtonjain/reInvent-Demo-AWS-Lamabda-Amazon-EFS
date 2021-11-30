@@ -68,13 +68,15 @@ The following diagram illustrates the solution architecture:
     aws ec2 modify-volume --volume-id $VOLUME_ID --size 30
     ```
 
-2. Let’s ensure our Linux environment makes use of the newly allocated space. 
+2. To ensure that our environment makes use of the newly allocated space, we would have to reboot the instance.
+- Open a new tab and navigate to the EC2 console.
+- Select the instance, and click on Instance State dropdown. 
+- Click on `Reboot Instance`.
 
-    ```
-    sudo growpart /dev/nvme0n1 1
+![reboot](screenshots/ec2_reboot.png)
 
-    sudo xfs_growfs -d /
-    ```
+- Navidate to Cloud9 and click on `Open IDE`
+- Now we are ready to build and deploy the application. 
 
 3. Type in the terminal: `sam init`
 
@@ -111,7 +113,9 @@ SAM should start the deployment process by uploading your container image to Ama
 
 8. Select yes for `Deploy this changeset?`
 
-9. Copy the InferenceApi endpoint that is created for later.  
+9. Once the stack is setup, you will recieve an InferenceApi endpoint. We will use this endpoint to make inference requests later. 
+
+![Inference Endpoint](screenshots/inference_endpoint.png)
 
 **Stage 4** Upload Language Model to S3
 
@@ -124,13 +128,16 @@ SAM should start the deployment process by uploading your container image to Ama
 
 2. Unzip the models, so they are extracted as .pth files and upload them to the newly created S3 bucket. 
 
-3. Validate the models have been downloaded to EFS, by checking the EFS size to be ~110 MB.
+3. Once uploaded, your S3 bucket should looks like this
+
+![S3 Bucket](screenshots/s3_bucket.png)
 
 **Stage 5** Make Inference request
 
 1. Make this curl request using the endpoint that was created in Stage 3 Step 9.
 
-```curl -X POST \
+```
+curl -X POST \
   [YOUR_ENDPOINT_HERE] \
   -H 'cache-control: no-cache' \
   -H 'postman-token: 9566069a-e7ce-bf1e-9a5e-043b73f9faf0' \

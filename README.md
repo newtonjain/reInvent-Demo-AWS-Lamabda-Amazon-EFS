@@ -62,27 +62,25 @@ The following diagram illustrates the solution architecture:
     aws ec2 modify-volume --volume-id $VOLUME_ID --size 30
     ```
 
-2. To ensure that our environment makes use of the newly allocated space, we would have to reboot the instance.
-- Open a new tab and navigate to the EC2 console.
-- Select the instance, and click on Instance State dropdown. 
-- Click on `Reboot Instance`.
+2. Let’s ensure our Linux environment makes use of the newly allocated space.
 
-![reboot](screenshots/ec2_reboot.png)
-
-- Navigate to Cloud9 and click on `Open IDE`
-- Now we are ready to build and deploy the application. 
-
-3. Type in the terminal: `sam init`
-
-4. Select Custom template location and type: 
 ```
-https://github.com/aws-samples/ml-inference-using-aws-lambda-and-amazon-efs.git
+sudo growpart /dev/nvme0n1 1
+
+sudo xfs_growfs -d / 
 ```
 
-5. The template uses Python 3.8. Install that in your environment using: 
+3. The template uses Python 3.8. Install that in your environment using: 
 
 ```
 sudo amazon-linux-extras install python3.8
+```
+
+4. Type in the terminal: `sam init`
+
+5. Select option `2 - Custom Template Location` and type: 
+```
+https://github.com/aws-samples/ml-inference-using-aws-lambda-and-amazon-efs.git
 ```
 
 6. Build the application with SAM using `sam build`. 
@@ -91,47 +89,64 @@ sudo amazon-linux-extras install python3.8
 
 **Stage 3** Deploy the CloudFormation stack with SAM following these steps.
 
-1. Use guided deployment with SAM by using `sam deploy --guided`
 
-2. Use stack name as `reinventdemo`
 
-3. Use AWS Region as `us-east-1`
+1. Refresh your Cloud9 IDE page.<b> Note: This step is needed to create new temporary credentials valid for 15 minutes.</b>
 
-4. For Parameter SrcBucket, create a unique bucket name. We will use the last 4 digits of your phone number to make the bucket name unique. 
+2. Use guided deployment with SAM by using `sam deploy --guided`
+
+3. Use stack name as `reinventdemo`
+
+4. Use AWS Region as `us-east-1`
+
+5. For Parameter SrcBucket, create a unique bucket name. We will use the last 4 digits of your phone number to make the bucket name unique. 
 `reinventdemobucket-<PHONE_NUMBER_DIGITS>`
 
-5. Select Yes for the next set of prompts:
+6. Select Yes for the next set of prompts:
     - Confirm changes before deploy - Y
     - Allow SAM CLI IAM role creation - Y
     - InferenceFunction may not have authorization defined, Is this okay - Y
     - Save arguments to configuration file - Y
 
-6. Press Enter to select default for for `SAM configuration file [samconfig.toml]`
+7. Press Enter to select default for for `SAM configuration file [samconfig.toml]`
 
-7. Press Enter to select default for `SAM configuration environment [default]`
+8. Press Enter to select default for `SAM configuration environment [default]`
 
 SAM should start the deployment process by uploading your container image to Amazon ECR and set-up the stack. 
 
-8. Select yes for `Deploy this changeset?`
+9. Select yes for `Deploy this changeset?`
 
-9. Once the stack is setup, you will receive an InferenceApi endpoint. We will use this endpoint to make inference requests later. 
+10. Once the stack is setup, you will receive an InferenceApi endpoint. We will use this endpoint to make inference requests later. 
 
 ![Inference Endpoint](screenshots/inference_endpoint.png)
 
+Copy the endpoint in a variable. 
+
+``` 
+INFERENCE_ENDPOINT=[YOUR API ENDPOINT VALUE FROM OUTPUTS]
+```
+
 **Stage 4** Upload Language Model to S3
 
-1. Download the text detection and language model from EasyOCR. 
-    - [craft_mlt_25k](https://github.com/JaidedAI/EasyOCR/releases/download/pre-v1.1.6/craft_mlt_25k.zip)
+1. Set the BUCKET_NAME variable by entering the name of the bucket you created in Stage 3 Step 4.
 
-    - [English](https://github.com/JaidedAI/EasyOCR/releases/download/v1.3/english_g2.zip)
+```
+BUCKET_NAME=[BUCKET_NAME_FROM_STAGE3_STEP4]
+```
 
-    - [French](https://github.com/JaidedAI/EasyOCR/releases/download/v1.3/latin_g2.zip)
+2. Download the text detection and language model from EasyOCR. 
 
-2. Unzip the models, so they are extracted as .pth files and upload them to the newly created S3 bucket. 
+```
+wget https://github.com/JaidedAI/EasyOCR/releases/download/pre-v1.1.6/craft_mlt_25k.zip && unzip craft_mlt_25k.zip && aws s3 cp craft_mlt_25k.pth  s3://$BUCKET_NAME &&\
+wget https://github.com/JaidedAI/EasyOCR/releases/download/v1.3/english_g2.zip && unzip english_g2.zip && aws s3 cp english_g2.pth  s3://$BUCKET_NAME &&\
+wget https://github.com/JaidedAI/EasyOCR/releases/download/v1.3/latin_g2.zip && unzip latin_g2.zip && aws s3 cp latin_g2.pth  s3://$BUCKET_NAME
+```
 
-3. Once uploaded, your S3 bucket should look like this
+3. Once uploaded, check the 3 models have been uploaded to S3 by running:
 
-![S3 Bucket](screenshots/s3_bucket.png)
+```
+aws s3 ls s3://$BUCKET_NAME
+```
 
 **Stage 5** Make Inference request
 
@@ -142,7 +157,7 @@ SAM should start the deployment process by uploading your container image to Ama
 
 ```
 curl -X POST \
-  [YOUR_ENDPOINT_HERE] \
+  $INFERENCE_ENDPOINT \
   -H 'cache-control: no-cache' \
   -H 'postman-token: 9566069a-e7ce-bf1e-9a5e-043b73f9faf0' \
   -d '{
@@ -158,11 +173,26 @@ You should get an inference response with the predicted label.
 
 ```
 curl -X POST \
-  [YOUR_ENDPOINT_HERE] \
+  $INFERENCE_ENDPOINT \
   -H 'cache-control: no-cache' \
   -H 'postman-token: 9566069a-e7ce-bf1e-9a5e-043b73f9faf0' \
   -d '{
 "link": "https://www.maisonlaudiere.com/s/cc_images/teaserbox_460639.jpg", 
+"language": "fr"
+}'
+```
+
+3. You can use multiple language models simultaneously by adding multiple language attributes in your request metadata. Here an example. 
+
+![Spanish Image](https://demo622.s3.amazonaws.com/english-spanish.jpg)
+
+```
+curl -X POST \
+  $INFERENCE_ENDPOINT \
+  -H 'cache-control: no-cache' \
+  -H 'postman-token: 9566069a-e7ce-bf1e-9a5e-043b73f9faf0' \
+  -d '{
+"link": "https://demo622.s3.amazonaws.com/english-spanish.jpg", 
 "language": "fr"
 }'
 ```

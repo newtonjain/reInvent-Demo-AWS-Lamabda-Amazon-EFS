@@ -80,13 +80,20 @@ The following diagram illustrates the solution architecture:
 
 3. Type in the terminal: `sam init`
 
-4. Select Custom template location and type: `https://github.com/aws-samples/ml-inference-using-aws-lambda-and-amazon-efs.git`
+4. Select Custom template location and type: 
+```
+https://github.com/aws-samples/ml-inference-using-aws-lambda-and-amazon-efs.git
+```
 
-5. The template uses Python 3.8. Install that in your environment using: `sudo amazon-linux-extras install python3.8`
+5. The template uses Python 3.8. Install that in your environment using: 
+
+```
+sudo amazon-linux-extras install python3.8
+```
 
 6. Build the application wuth SAM using `sam build`. 
 
-    Once finished, you will see Build Succeeded in the terminal. If the build fails, get some assistance from the presenters. 
+    You might see a few warnings but the build process will complete. Once finished, you will see Build Succeeded in the terminal. If the build fails, get some assistance from the presenters. 
 
 **Stage 3** Deploy the CloudFormation stack with SAM following these steps.
 
@@ -96,7 +103,7 @@ The following diagram illustrates the solution architecture:
 
 3. Use AWS Region as `us-east-1`
 
-4. For Parameter SrcBucket, create a unique bucket name. We will use the last 4 digits of your phone number to ensure this. 
+4. For Parameter SrcBucket, create a unique bucket name. We will use the last 4 digits of your phone number to make the bucket name unique. 
 `reinventdemobucket-<PHONE_NUMBER_DIGITS>`
 
 5. Select Yes for the next set of prompts:
@@ -134,7 +141,10 @@ SAM should start the deployment process by uploading your container image to Ama
 
 **Stage 5** Make Inference request
 
-1. Make this curl request using the endpoint that was created in Stage 3 Step 9.
+1. Make this curl request using the endpoint that was created in Stage 3 Step 9.  The first image we will extract text from is an english image.
+
+![English Image](https://demo622.s3.amazonaws.com/english-1.png)
+
 
 ```
 curl -X POST \
@@ -146,8 +156,22 @@ curl -X POST \
 "language": "en"
 }'
 ```
-
 You should get an inference response with the predicted label. 
+
+2. You can try different launguages by changing the language code. Try this request for extracting text from a French Traffic Sign.
+
+![French Image](https://www.maisonlaudiere.com/s/cc_images/teaserbox_460639.jpg)
+
+```
+curl -X POST \
+  [YOUR_ENDPOINT_HERE] \
+  -H 'cache-control: no-cache' \
+  -H 'postman-token: 9566069a-e7ce-bf1e-9a5e-043b73f9faf0' \
+  -d '{
+"link": "https://www.maisonlaudiere.com/s/cc_images/teaserbox_460639.jpg", 
+"language": "fr"
+}'
+```
 
 # Summary
 In this workshop, you deployed a multi-model inferencing endpoint using AWS Lambda and Amazon EFS. 

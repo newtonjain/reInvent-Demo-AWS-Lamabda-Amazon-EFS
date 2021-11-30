@@ -193,7 +193,7 @@ curl -X POST \
   -H 'postman-token: 9566069a-e7ce-bf1e-9a5e-043b73f9faf0' \
   -d '{
 "link": "https://demo622.s3.amazonaws.com/english-spanish.jpg", 
-"language": "fr"
+"language": "en, es"
 }'
 ```
 

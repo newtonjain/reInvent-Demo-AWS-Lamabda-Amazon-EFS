@@ -1,5 +1,5 @@
 # Deploy multiple machine learning models for inference on AWS Lambda and Amazon EFS
-In This guide, you will find the steps needed to deploy an OCR application on AWS Lambda to perform inference on images in different languages and use Amazon EFS for model management. 
+In this guide, you will find the steps needed to deploy an OCR application on AWS Lambda to perform inference on images in different languages and use Amazon EFS for model management. 
 
 ## Services Used 
 
@@ -8,25 +8,19 @@ Services used in this demo:
 2) Amazon EFS
 3) API Gateway 
 4) CloudFormation
-5) AWS Serverless Application Model 
+5) AWS Serverless Application Model (AWS SAM)
 
 ## Application Workflow 
 
-Here is the architectural work flow of our application:
+Here is the architectural workflow of our application:
 
-- Create a serverless application which will __trigger__ a Lambda function upon a new model upload in your `S3 bucket`. And the function would copy that file from your S3 bucket to `Amazon EFS File System`
+- Create a serverless application that will __trigger__ a Lambda function upon a new model upload in your `S3 bucket`. And the function would copy that file from your S3 bucket to `Amazon EFS File System`.
 
-- Create another Lambda function that will load the model from `Amazon EFS` and performs an __inferenece__ based on an image.
+- Create another Lambda function that will load the model from `Amazon EFS` and performs an __inference__ based on an image.
 
-- Build and deploy both the application using  `AWS Serverless Application Model (AWS SAM)` application.
+- Build and deploy both applications using  `AWS Serverless Application Model (AWS SAM)` application.
 
 # Architecture 
-
-To use the Amazon EFS file system from Lambda, you need the following:
-
-- An Amazon __Virtual Private Cloud (Amazon VPC)__
-- An __Amazon EFS__ file system created within that VPC with an access point as an application entry point for your __Lambda function__.
-- A __Lambda function__ (in the same VPC and private subnets) referencing the access point.
 
 The following diagram illustrates the solution architecture:
 
@@ -75,7 +69,7 @@ The following diagram illustrates the solution architecture:
 
 ![reboot](screenshots/ec2_reboot.png)
 
-- Navidate to Cloud9 and click on `Open IDE`
+- Navigate to Cloud9 and click on `Open IDE`
 - Now we are ready to build and deploy the application. 
 
 3. Type in the terminal: `sam init`
@@ -91,9 +85,9 @@ https://github.com/aws-samples/ml-inference-using-aws-lambda-and-amazon-efs.git
 sudo amazon-linux-extras install python3.8
 ```
 
-6. Build the application wuth SAM using `sam build`. 
+6. Build the application with SAM using `sam build`. 
 
-    You might see a few warnings but the build process will complete. Once finished, you will see Build Succeeded in the terminal. If the build fails, get some assistance from the presenters. 
+    You might see a few warnings, but the build process will complete. Once finished, you will see Build Succeeded in the terminal. If the build fails, get some assistance from the presenters. 
 
 **Stage 3** Deploy the CloudFormation stack with SAM following these steps.
 
@@ -120,7 +114,7 @@ SAM should start the deployment process by uploading your container image to Ama
 
 8. Select yes for `Deploy this changeset?`
 
-9. Once the stack is setup, you will recieve an InferenceApi endpoint. We will use this endpoint to make inference requests later. 
+9. Once the stack is setup, you will receive an InferenceApi endpoint. We will use this endpoint to make inference requests later. 
 
 ![Inference Endpoint](screenshots/inference_endpoint.png)
 
@@ -135,13 +129,13 @@ SAM should start the deployment process by uploading your container image to Ama
 
 2. Unzip the models, so they are extracted as .pth files and upload them to the newly created S3 bucket. 
 
-3. Once uploaded, your S3 bucket should looks like this
+3. Once uploaded, your S3 bucket should look like this
 
 ![S3 Bucket](screenshots/s3_bucket.png)
 
 **Stage 5** Make Inference request
 
-1. Make this curl request using the endpoint that was created in Stage 3 Step 9.  The first image we will extract text from is an english image.
+1. Make this curl request using the endpoint that was created in Stage 3 Step 9.  The first image we will extract text from is an English image.
 
 ![English Image](https://demo622.s3.amazonaws.com/english-1.png)
 
@@ -158,7 +152,7 @@ curl -X POST \
 ```
 You should get an inference response with the predicted label. 
 
-2. You can try different launguages by changing the language code. Try this request for extracting text from a French Traffic Sign.
+2. You can try different languages by changing the language code. Try this request for extracting text from a French Traffic Sign.
 
 ![French Image](https://www.maisonlaudiere.com/s/cc_images/teaserbox_460639.jpg)
 

@@ -85,13 +85,13 @@ https://github.com/aws-samples/ml-inference-using-aws-lambda-and-amazon-efs.git
 
 6. Build the application with SAM using `sam build`. 
 
-    You might see a few warnings, but the build process will complete. Once finished, you will see Build Succeeded in the terminal. If the build fails, get some assistance from the presenters. 
+    You might see a few warnings, but the build process will complete. Once finished, you will see `Build Succeeded` in the terminal. If the build fails, get some assistance from the presenters. 
 
 **Stage 3** Deploy the CloudFormation stack with SAM following these steps.
 
 
 
-1. Refresh your Cloud9 IDE page.<b> Note: This step is needed to create new temporary credentials valid for 15 minutes.</b>
+1. Refresh your Cloud9 IDE page.<b style="color:red"> Note: This step is needed to create new temporary credentials valid for 15 minutes.</b>
 
 2. Use guided deployment with SAM by using `sam deploy --guided`
 
@@ -134,7 +134,7 @@ INFERENCE_ENDPOINT=[YOUR API ENDPOINT VALUE FROM OUTPUTS]
 BUCKET_NAME=[BUCKET_NAME_FROM_STAGE3_STEP4]
 ```
 
-2. Download the text detection and language model from EasyOCR. 
+2. Download the text detection and language models from EasyOCR. 
 
 ```
 wget https://github.com/JaidedAI/EasyOCR/releases/download/pre-v1.1.6/craft_mlt_25k.zip && unzip craft_mlt_25k.zip && aws s3 cp craft_mlt_25k.pth  s3://$BUCKET_NAME &&\
@@ -150,7 +150,7 @@ aws s3 ls s3://$BUCKET_NAME
 
 **Stage 5** Make Inference request
 
-1. Make this curl request using the endpoint that was created in Stage 3 Step 9.  The first image we will extract text from is an English image.
+1. Make this curl request using the endpoint variable that was created in Stage 3 Step 10. The first image we will extract text from is in English.
 
 ![English Image](https://demo622.s3.amazonaws.com/english-1.png)
 
@@ -182,7 +182,7 @@ curl -X POST \
 }'
 ```
 
-3. You can use multiple language models simultaneously by adding multiple language attributes in your request metadata. Here an example. 
+3. You can also use multiple language models simultaneously by adding multiple language attributes in your request metadata. Here is an example for extracting text from an image containing both English and Spanish. 
 
 ![Spanish Image](https://demo622.s3.amazonaws.com/english-spanish.jpg)
 
@@ -202,8 +202,7 @@ In this workshop, you deployed a multi-model inferencing endpoint using AWS Lamb
 
 When you upload your models to S3, an AWS Lambda function gets triggered and loads the models into an Amazon Elastic File System that is mounted on a second AWS Lambda function that is connected to an API gateway endpoint to perform optical character recognition on images in multiple languages. When an inference request is sent, based on the language specified, the Lambda function fetches the appropriate language model from mounted EFS and uses that to produce a `predicted_label`. 
 
-This pattern simplifies your model management using Amazon EFS while providing benefits of Serverless ML in terms of pay-for-use, simple programming model, and reduced operational overhead.
-
+This pattern simplifies your model management using Amazon EFS while providing benefits of Serverless ML in terms of pay-for-use, simplified programming model, and reduced operational overhead.
 
 
 # Demo walkthrough
